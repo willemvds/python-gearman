@@ -1,4 +1,5 @@
 import logging
+import six
 
 import gearman.io
 import gearman.util
@@ -23,7 +24,7 @@ class NoopEncoder(DataEncoder):
     """Provide common object dumps for all communications over gearman"""
     @classmethod
     def _enforce_byte_string(cls, given_object):
-        if type(given_object) != str:
+        if type(given_object) != six.binary_type:
             raise TypeError("Expecting byte string, got %r" % type(given_object))
 
     @classmethod
@@ -129,7 +130,7 @@ class GearmanConnectionManager(object):
         # a timeout of -1 when used with epoll will block until there
         # is activity. Select does not support negative timeouts, so this
         # is translated to a timeout=None when falling back to select
-        timeout = timeout or -1 
+        timeout = timeout or -1
 
         readable = set()
         writable = set()
@@ -194,7 +195,7 @@ class GearmanConnectionManager(object):
         connection_ok = compat.any(current_connection.connected for current_connection in submitted_connections)
         poller = gearman.io.get_connection_poller()
         if connection_ok:
-            self._register_connections_with_poller(submitted_connections, 
+            self._register_connections_with_poller(submitted_connections,
                     poller)
             connection_map = dict([(c.fileno(), c) for c in
                 submitted_connections if c.connected])
